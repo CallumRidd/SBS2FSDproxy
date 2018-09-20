@@ -2,7 +2,7 @@
 Converts ADS-B and MLAT position and velocity data from a provider like ADSBX
 to conform to the SBS protocol, which can then be streamed to an FSD proxy for
 display in Euroscope, the ICAO hex address is also linked to aircraft model and
-registration. You can modify LATITUDE, longitude and distance variables to suit
+registration. You can modify Latitude, longitude and distance variables to suit
 your needs its currently centred around NZ domestic FIR. Press disconnect in the FSD
 proxy first to save data before closing the python program.
 
