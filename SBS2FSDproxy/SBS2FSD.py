@@ -2,7 +2,7 @@
 Converts ADS-B and MLAT position and velocity data from a provider like ADSBX
 to conform to the SBS protocol, which can then be streamed to an FSD proxy for
 display in Euroscope, the ICAO hex address is also linked to aircraft model and
-registration. You can modify latitude, longitude and distance variables to suit
+registration. You can modify LATITUDE, longitude and distance variables to suit
 your needs its currently centred around NZ domestic FIR. Press disconnect in the FSD
 proxy first to save data before closing the python program.
 
@@ -15,12 +15,13 @@ import socket
 import sys
 import time
 import requests
-latitude, longitude, distance = -41.627144, 173.853380, 2100
-request_all = False
-provider = 'https://public-api.adsbexchange.com/VirtualRadar/AircraftList.json'
 
-if not request_all:
-    provider += ('?lat={}&lng={}&fDstL=0&fDstU={}'.format(latitude, longitude, distance))
+LATITUDE, LONGITUDE, DISTANCE = -41.627144, 173.853380, 2100
+REQUEST_ALL = True
+PROVIDER = 'https://public-api.adsbexchange.com/VirtualRadar/AircraftList.json'
+if not REQUEST_ALL:
+    PROVIDER += ('?lat={}&lng={}&fDstL=0&fDstU={}'.format(LATITUDE, LONGITUDE, DISTANCE))
+
 os.chdir(sys.path[0])
 with open('icao24.txt', 'r') as icao_file:
     icao = set([l for l in icao_file])
@@ -49,10 +50,14 @@ def save_data():
     aircrafts_file.close()
 
 def convert_to_sbs(plane):
-    sbs = 'MSG,3,{session_id},{aircraft_id},{hex_ident},{flight_id},,,,,{callsign},{altitude},{ground_speed},{track},{Lat},{Long},{vertical_rate},{squawk},0,0,0,0\n'
-    return(sbs.format(session_id=plane.get('Id', ""), aircraft_id=plane.get('Id', ""), hex_ident=plane.get('Icao', ""), flight_id=plane.get('Id', ""),
-                      callsign=plane.get('Call', ""), altitude=plane.get('Alt', ""), ground_speed=plane.get('Spd', ""), track=plane.get('Trak', ""),
-                      Lat=plane.get('Lat', ""), Long=plane.get('Long', ""), vertical_rate=plane.get('Vsi', ""), squawk=plane.get('Sqk', "")))
+    sbs = 'MSG,3,{session_id},{aircraft_id},{hex_ident},{flight_id},,,,,\
+    {callsign},{altitude},{ground_speed},{track},{Lat},{Long},{vertical_rate},{squawk},0,0,0,0\n'
+    return(sbs.format(session_id=plane.get('Id', ""), aircraft_id=plane.get('Id', ""),
+                      hex_ident=plane.get('Icao', ""), flight_id=plane.get('Id', ""),
+                      callsign=plane.get('Call', ""), altitude=plane.get('Alt', ""),
+                      ground_speed=plane.get('Spd', ""), track=plane.get('Trak', ""),
+                      Lat=plane.get('Lat', ""), Long=plane.get('Long', ""),
+                      vertical_rate=plane.get('Vsi', ""), squawk=plane.get('Sqk', "")))
 
 while 1:
     print('Waiting for FSD proxy.')
@@ -60,18 +65,19 @@ while 1:
     print('Connection from FSD proxy', connection, client_address)
     try:
         while 1:
-            data = requests.get(provider)
+            data = requests.get(PROVIDER)
             if data.ok:
                 data = data.json()
                 for plane in data['acList']:
                     connection.sendall(str.encode(convert_to_sbs(plane)))
-                    plane_Icao, plane_Reg, plane_Type = plane.get('Icao', ""), plane.get('Reg', ""), plane.get('Type', "")
-                    if plane_Icao and plane_Reg:
-                        if not '{}\t{}\n'.format(plane_Icao, plane_Reg) in icao:
-                            icao.add('{}\t{}\n'.format(plane_Icao, plane_Reg))
-                    if plane_Reg and plane_Type:
-                        if not '{}\t\t{}\n'.format(plane_Reg, plane_Type) in aircrafts:
-                            aircrafts.add('{}\t\t{}\n'.format(plane_Reg, plane_Type))
+                    plane_Icao, plane_reg, = plane.get('Icao', ""), plane.get('Reg', ""),
+                    if plane_Icao and plane_reg:
+                        if not '{}\t{}\n'.format(plane_Icao, plane_reg) in icao:
+                            icao.add('{}\t{}\n'.format(plane_Icao, plane_reg))
+                    plane_type = plane.get('Type', "")
+                    if plane_reg and plane_type:
+                        if not '{}\t\t{}\n'.format(plane_reg, plane_type) in aircrafts:
+                            aircrafts.add('{}\t\t{}\n'.format(plane_reg, plane_type))
                 print('Total Aircraft Requested >>>', len(data['acList']))
                 time.sleep(4)
             else:
