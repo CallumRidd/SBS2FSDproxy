@@ -23,11 +23,17 @@ if not REQUEST_ALL:
     PROVIDER += ('?lat={}&lng={}&fDstL=0&fDstU={}'.format(LATITUDE, LONGITUDE, DISTANCE))
 
 os.chdir(sys.path[0])
-with open('icao24.txt', 'r') as icao_file:
-    icao = set([l for l in icao_file])
+if os.path.exists('icao24.txt') and os.path.exists('aircrafts.txt'):
+    with open('icao24.txt', 'r') as icao_file:
+        icao = set([l for l in icao_file])
+    with open('aircrafts.txt', 'r') as aircrafts_file:
+        aircrafts = set([l for l in aircrafts_file])
+else:
+    with open('icao24.txt', 'w') as icao_file:
+        icao = set()
+    with open('aircrafts.txt', 'w') as aircrafts_file:
+        aircrafts = set()
 icao_file.close()
-with open('aircrafts.txt', 'r') as aircrafts_file:
-    aircrafts = set([l for l in aircrafts_file])
 aircrafts_file.close()
 
 SOCK = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -68,13 +74,13 @@ while 1:
             data = requests.get(PROVIDER)
             if data.ok:
                 data = data.json()
-                for plane in data['acList']:
-                    connection.sendall(str.encode(convert_to_sbs(plane)))
-                    plane_icao, plane_reg, = plane.get('Icao', ""), plane.get('Reg', ""),
+                for a_plane in data['acList']:
+                    connection.sendall(str.encode(convert_to_sbs(a_plane)))
+                    plane_icao, plane_reg, = a_plane.get('Icao', ""), a_plane.get('Reg', ""),
                     if plane_icao and plane_reg:
                         if not '{}\t{}\n'.format(plane_icao, plane_reg) in icao:
                             icao.add('{}\t{}\n'.format(plane_icao, plane_reg))
-                    plane_type = plane.get('Type', "")
+                    plane_type = a_plane.get('Type', "")
                     if plane_reg and plane_type:
                         if not '{}\t\t{}\n'.format(plane_reg, plane_type) in aircrafts:
                             aircrafts.add('{}\t\t{}\n'.format(plane_reg, plane_type))
