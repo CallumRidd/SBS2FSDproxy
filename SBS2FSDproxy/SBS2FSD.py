@@ -70,10 +70,10 @@ while 1:
                 data = data.json()
                 for plane in data['acList']:
                     connection.sendall(str.encode(convert_to_sbs(plane)))
-                    plane_Icao, plane_reg, = plane.get('Icao', ""), plane.get('Reg', ""),
-                    if plane_Icao and plane_reg:
-                        if not '{}\t{}\n'.format(plane_Icao, plane_reg) in icao:
-                            icao.add('{}\t{}\n'.format(plane_Icao, plane_reg))
+                    plane_icao, plane_reg, = plane.get('Icao', ""), plane.get('Reg', ""),
+                    if plane_icao and plane_reg:
+                        if not '{}\t{}\n'.format(plane_icao, plane_reg) in icao:
+                            icao.add('{}\t{}\n'.format(plane_icao, plane_reg))
                     plane_type = plane.get('Type', "")
                     if plane_reg and plane_type:
                         if not '{}\t\t{}\n'.format(plane_reg, plane_type) in aircrafts:
