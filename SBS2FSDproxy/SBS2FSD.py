@@ -26,15 +26,13 @@ os.chdir(sys.path[0])
 if os.path.exists('icao24.txt') and os.path.exists('aircrafts.txt'):
     with open('icao24.txt', 'r') as icao_file:
         icao = set([l for l in icao_file])
+    icao_file.close()
     with open('aircrafts.txt', 'r') as aircrafts_file:
         aircrafts = set([l for l in aircrafts_file])
+    aircrafts_file.close()
 else:
-    with open('icao24.txt', 'w') as icao_file:
-        icao = set()
-    with open('aircrafts.txt', 'w') as aircrafts_file:
-        aircrafts = set()
-icao_file.close()
-aircrafts_file.close()
+    icao = set()
+    aircrafts = set()
 
 SOCK = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 SERVER_ADDRESS = ('127.0.0.1', 30003)
