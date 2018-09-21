@@ -4,7 +4,7 @@ to conform to the SBS protocol, which can then be streamed to an FSD proxy for
 display in Euroscope, the ICAO hex address is also linked to aircraft model and
 registration. You can modify Latitude, longitude and distance variables to suit
 your needs its currently centred around NZ domestic FIR. Press disconnect in the FSD
-proxy first to save data before closing the python program.
+proxy first to save data before closing the Python program.
 
 Author: Callum Riddington
 Python: 3.7
@@ -17,7 +17,7 @@ import time
 import requests
 
 LATITUDE, LONGITUDE, DISTANCE = -41.627144, 173.853380, 2100
-REQUEST_ALL = True
+REQUEST_ALL = False
 PROVIDER = 'https://public-api.adsbexchange.com/VirtualRadar/AircraftList.json'
 if not REQUEST_ALL:
     PROVIDER += ('?lat={}&lng={}&fDstL=0&fDstU={}'.format(LATITUDE, LONGITUDE, DISTANCE))
